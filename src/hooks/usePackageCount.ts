@@ -170,9 +170,15 @@ export function usePackageCount() {
         localStorage.setItem('session_start', now);
         setSessionStart(now);
 
+        // Zera explicitamente
         setCount(0);
         setLastPackages([]);
         playSuccessSound();
+
+        // Força recarregamento para garantir que nada "antigo" apareça por delay de estado
+        setTimeout(() => {
+            loadTodayCounts();
+        }, 100);
     };
 
     return {
