@@ -115,6 +115,7 @@ export function usePackageCount() {
                     setCount(prev => prev - 1);
                 } else {
                     console.error('Erro ao salvar:', error);
+                    alert(`Erro ao salvar no banco: ${error.message} (Código: ${error.code})`); // DEBUG EXPLICITO
                     setFeedback('error');
                     playErrorSound();
                     setLastPackages(prev => prev.filter(p => p.id !== tempId));
@@ -128,8 +129,9 @@ export function usePackageCount() {
                 // Garante consistência atualizando contagem total
                 loadTodayCounts();
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Erro inesperado:', err);
+            alert(`Erro inesperado de rede/cliente: ${err.message || JSON.stringify(err)}`); // DEBUG EXPLICITO
             setFeedback('error');
             playErrorSound();
             // Revert em caso de erro crítico
