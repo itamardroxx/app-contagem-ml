@@ -18,15 +18,14 @@ export function usePackageCount() {
         return localStorage.getItem('session_start') || startOfDay.toISOString();
     });
 
-    const loadTodayCounts = useCallback(async () => {
+    const loadTodayCounts = useCallback(async (overrideSessionStart?: string) => {
         // Busca contagem total DO LOTE ATUAL (visual)
-        // Se quisermos contagem total do dia independente do reset, mantemos a query original para um "totalDayCount" separado
-        // Mas o usuário quer "zerar". Então vamos filtrar pela sessionStart.
+        const currentStart = overrideSessionStart || sessionStart;
 
         const { count: total, error: countError } = await supabase
             .from('package_counts')
             .select('*', { count: 'exact', head: true })
-            .gte('created_at', sessionStart);
+            .gte('created_at', currentStart);
 
         if (countError) console.error('Erro ao buscar contagem:', countError);
         else setCount(total || 0);
@@ -35,7 +34,7 @@ export function usePackageCount() {
         const { data, error: listError } = await supabase
             .from('package_counts')
             .select('*')
-            .gte('created_at', sessionStart)
+            .gte('created_at', currentStart)
             .order('created_at', { ascending: false })
             .limit(100);
 
@@ -67,6 +66,8 @@ export function usePackageCount() {
         };
     }, [loadTodayCounts]);
 
+    // ... (keep addPackage and removePackage same)
+
     const addPackage = async (key: string) => {
         // Validação: Se menor que 44 ou vazio (mas vamos ignorar vazio se for evento de blur/enter extra)
         if (!key) return;
@@ -83,7 +84,6 @@ export function usePackageCount() {
 
         // OPTIMISTIC UPDATE: Atualiza interface antes de confirmar no banco
         const tempId = Math.random().toString(36).substr(2, 9);
-        // ... (rest of logic)
         const tempPackage: PackageCount = {
             id: tempId,
             nfe_key: key,
@@ -168,6 +168,7 @@ export function usePackageCount() {
         // "Finalizar dia" agora reseta a visualização definindo um novo marco de início
         const now = new Date().toISOString();
         localStorage.setItem('session_start', now);
+        // Atualiza estado local
         setSessionStart(now);
 
         // Zera explicitamente
@@ -175,10 +176,8 @@ export function usePackageCount() {
         setLastPackages([]);
         playSuccessSound();
 
-        // Força recarregamento para garantir que nada "antigo" apareça por delay de estado
-        setTimeout(() => {
-            loadTodayCounts();
-        }, 100);
+        // Força recarregamento imediato usando o NOVO horário, ignorando o estado antigo
+        loadTodayCounts(now);
     };
 
     return {
