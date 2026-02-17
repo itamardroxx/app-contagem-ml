@@ -171,15 +171,19 @@ const finishDay = async () => {
     // "Finalizar dia" agora reseta a visualização definindo um novo marco de início
     const now = new Date().toISOString();
     localStorage.setItem('session_start', now);
-    // Atualiza estado local
-    setSessionStart(now);
 
-    // Zera explicitamente
+    // Atualiza estado local E a ref imediatamente para evitar race condition
+    setSessionStart(now);
+    sessionStartRef.current = now; // <--- CRITICAL FIX
+
+    // Zera explicitamente e instantaneamente
     setCount(0);
     setLastPackages([]);
     playSuccessSound();
 
-    // Força recarregamento imediato usando o NOVO horário, ignorando o estado antigo
+    // Força recarregamento imediato usando o NOVO horário
+    // Mas como acabamos de zerar, talvez nem precise carregar nada se confiarmos no reset
+    // Mantemos o load apenas para garantir consistência com o servidor
     loadTodayCounts(now);
 };
 
