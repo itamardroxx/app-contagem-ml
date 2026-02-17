@@ -115,7 +115,7 @@ export function usePackageCount() {
                     setCount(prev => prev - 1);
                 } else {
                     console.error('Erro ao salvar:', error);
-                    alert(`Erro ao salvar no banco: ${error.message} (Código: ${error.code})`); // DEBUG EXPLICITO
+                    // alert(`Erro ao salvar no banco: ${error.message} (Código: ${error.code})`); // REMOVIDO
                     setFeedback('error');
                     playErrorSound();
                     setLastPackages(prev => prev.filter(p => p.id !== tempId));

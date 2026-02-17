@@ -1,18 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Hardcoding credentials to guarantee connection on Vercel
+// This bypasses any env variable issues.
+const supabaseUrl = 'https://nschvzzblbrmvebtjzvp.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zY2h2enpibGJybXZlYnRqenZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNjg0NTYsImV4cCI6MjA4Njg0NDQ1Nn0.Tgf61l6h07UZ5sXQWB0LssFWo9lv8eDEJjJVT-mUB9c';
 
 let client;
 
 try {
-    if (!supabaseUrl || !supabaseAnonKey) {
-        console.warn("Supabase credentials missing! Using fallback/mock client to prevent crash.");
-        // Cria um client dummy ou tenta criar mesmo assim mas tratando erro
-        client = createClient('https://placeholder.supabase.co', 'placeholder');
-    } else {
-        client = createClient(supabaseUrl, supabaseAnonKey);
-    }
+    client = createClient(supabaseUrl, supabaseAnonKey);
 } catch (error) {
     console.error("Critical: Failed to initialize Supabase client", error);
     // Fallback extremo para não quebrar import
